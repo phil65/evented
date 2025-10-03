@@ -5,17 +5,19 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from llmling_agent.messaging.events import FileEventData
-from llmling_agent_events.base import EventSource
+from eventic_events.base import EventSource
+
+from eventic.messaging.events import FileEventData
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, AsyncIterator
 
-    from llmling_agent.messaging.events import ChangeType, EventData
-    from llmling_agent_config.events import FileWatchConfig
+    from eventic_config.events import FileWatchConfig
     from watchfiles import Change
     from watchfiles.main import FileChange
+
+    from eventic.messaging.events import ChangeType, EventData
 
 
 class ExtensionFilter:

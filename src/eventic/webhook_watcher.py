@@ -5,15 +5,16 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from llmling_agent.messaging.events import EventData
-from llmling_agent_events.base import EventSource
+from eventic_events.base import EventSource
+
+from eventic.messaging.events import EventData
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
+    from eventic_config.events import WebhookConfig
     from fastapi import Request
-    from llmling_agent_config.events import WebhookConfig
 
 
 class WebhookEventSource(EventSource):

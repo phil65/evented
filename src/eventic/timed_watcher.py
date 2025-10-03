@@ -6,15 +6,17 @@ import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from llmling_agent.messaging.events import TimeEventData
-from llmling_agent_events.base import EventSource
+from eventic_events.base import EventSource
+
+from eventic.messaging.events import TimeEventData
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
-    from llmling_agent.messaging.events import EventData
-    from llmling_agent_config.events import TimeEventConfig
+    from eventic_config.events import TimeEventConfig
+
+    from eventic.messaging.events import EventData
 
 
 class TimeEventSource(EventSource):

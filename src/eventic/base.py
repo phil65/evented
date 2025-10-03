@@ -1,11 +1,11 @@
-"""Event sources for LLMling agent."""
+"""Event sources for Eventic."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
-from llmling_agent.log import get_logger
+from eventic.log import get_logger
 
 
 logger = get_logger(__name__)
@@ -13,8 +13,9 @@ logger = get_logger(__name__)
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
-    from llmling_agent.messaging.events import EventData
-    from llmling_agent_config.events import EventConfig
+    from eventic_config.events import EventConfig
+
+    from eventic.messaging.events import EventData
 
 
 class EventSource(ABC):
@@ -52,7 +53,7 @@ class EventSource(ABC):
         Raises:
             ValueError: If source type is unknown or disabled
         """
-        from llmling_agent_config.events import (
+        from eventic.configs import (
             EmailConfig,
             FileWatchConfig,
             TimeEventConfig,

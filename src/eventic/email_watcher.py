@@ -5,9 +5,10 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from llmling_agent.log import get_logger
-from llmling_agent.messaging.events import EmailEventData
-from llmling_agent_events.base import EventSource
+from eventic_events.base import EventSource
+
+from eventic.log import get_logger
+from eventic.messaging.events import EmailEventData
 
 
 if TYPE_CHECKING:
@@ -15,8 +16,9 @@ if TYPE_CHECKING:
     from email.message import Message
 
     import aioimaplib
-    from llmling_agent.messaging.events import EventData
-    from llmling_agent_config.events import EmailConfig
+    from eventic_config.events import EmailConfig
+
+    from eventic.messaging.events import EventData
 
 logger = get_logger(__name__)
 
