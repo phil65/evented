@@ -65,19 +65,19 @@ class EventSource(ABC):
         logger.info("Creating event source: %s (%s)", config.name, config.type)
         match config:
             case FileWatchConfig():
-                from llmling_agent_events.file_watcher import FileSystemEventSource
+                from eventic.file_watcher import FileSystemEventSource
 
                 return FileSystemEventSource(config)
             case WebhookConfig():
-                from llmling_agent_events.webhook_watcher import WebhookEventSource
+                from eventic.webhook_watcher import WebhookEventSource
 
                 return WebhookEventSource(config)
             case EmailConfig():
-                from llmling_agent_events.email_watcher import EmailEventSource
+                from eventic.email_watcher import EmailEventSource
 
                 return EmailEventSource(config)
             case TimeEventConfig():
-                from llmling_agent_events.timed_watcher import TimeEventSource
+                from eventic.timed_watcher import TimeEventSource
 
                 return TimeEventSource(config)
             case _:
