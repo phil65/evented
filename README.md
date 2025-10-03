@@ -2,8 +2,6 @@
 
 [![PyPI License](https://img.shields.io/pypi/l/eventic.svg)](https://pypi.org/project/eventic/)
 [![Package status](https://img.shields.io/pypi/status/eventic.svg)](https://pypi.org/project/eventic/)
-[![Daily downloads](https://img.shields.io/pypi/dd/eventic.svg)](https://pypi.org/project/eventic/)
-[![Weekly downloads](https://img.shields.io/pypi/dw/eventic.svg)](https://pypi.org/project/eventic/)
 [![Monthly downloads](https://img.shields.io/pypi/dm/eventic.svg)](https://pypi.org/project/eventic/)
 [![Distribution format](https://img.shields.io/pypi/format/eventic.svg)](https://pypi.org/project/eventic/)
 [![Wheel availability](https://img.shields.io/pypi/wheel/eventic.svg)](https://pypi.org/project/eventic/)
@@ -21,12 +19,8 @@
 [![Github last commit](https://img.shields.io/github/last-commit/phil65/eventic)](https://github.com/phil65/eventic/commits)
 [![Github release date](https://img.shields.io/github/release-date/phil65/eventic)](https://github.com/phil65/eventic/releases)
 [![Github language count](https://img.shields.io/github/languages/count/phil65/eventic)](https://github.com/phil65/eventic)
-[![Github commits this week](https://img.shields.io/github/commit-activity/w/phil65/eventic)](https://github.com/phil65/eventic)
 [![Github commits this month](https://img.shields.io/github/commit-activity/m/phil65/eventic)](https://github.com/phil65/eventic)
-[![Github commits this year](https://img.shields.io/github/commit-activity/y/phil65/eventic)](https://github.com/phil65/eventic)
 [![Package status](https://codecov.io/gh/phil65/eventic/branch/main/graph/badge.svg)](https://codecov.io/gh/phil65/eventic/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyUp](https://pyup.io/repos/github/phil65/eventic/shield.svg)](https://pyup.io/repos/github/phil65/eventic/)
 
 [Read the documentation!](https://phil65.github.io/eventic/)
-
