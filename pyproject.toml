@@ -40,6 +40,14 @@ dependencies = [
     # Only add below (Copier)
 ]
 
+[project.optional-dependencies]
+events = [
+    "watchfiles",
+    "aioimaplib>=2.0.1",
+    "croniter>=6.0.0",
+    "fastapi",
+]
+
 [tool.uv]
 default-groups = ["dev", "lint", "docs"]
 

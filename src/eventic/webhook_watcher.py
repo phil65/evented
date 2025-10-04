@@ -5,16 +5,16 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from eventic_events.base import EventSource
-
-from eventic.messaging.events import EventData
+from eventic.base import EventSource
+from eventic.event_data import EventData
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
-    from eventic_config.events import WebhookConfig
     from fastapi import Request
+
+    from eventic.configs import WebhookConfig
 
 
 class WebhookEventSource(EventSource):

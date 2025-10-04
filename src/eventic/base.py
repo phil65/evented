@@ -13,9 +13,8 @@ logger = get_logger(__name__)
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
 
-    from eventic_config.events import EventConfig
-
-    from eventic.messaging.events import EventData
+    from eventic.configs import EventConfig
+    from eventic.event_data import EventData
 
 
 class EventSource(ABC):
