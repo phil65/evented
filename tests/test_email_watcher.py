@@ -1,5 +1,5 @@
 from __future__ import annotations
 
 
-def tet_nothing():
+def test_nothing():
     pass
