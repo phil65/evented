@@ -114,7 +114,7 @@ class EmailEventSource(EventSource):
             },
         )
 
-    async def events(self) -> AsyncGenerator[EventData, None]:
+    async def events(self) -> AsyncGenerator[EventData]:
         """Monitor inbox and yield new email events."""
         if not self._client:
             msg = "Not connected to email server"
