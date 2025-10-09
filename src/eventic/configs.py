@@ -73,13 +73,13 @@ class WebhookConfig(EventSourceConfig):
     type: Literal["webhook"] = Field("webhook", init=False)
     """webhook-based event."""
 
-    port: int
+    port: int = Field(default=..., ge=1, le=65535)
     """Port to listen on."""
 
     path: str
     """URL path to handle requests."""
 
-    secret: str | None = None
+    secret: SecretStr | None = None
     """Optional secret for request validation."""
 
 
@@ -111,10 +111,10 @@ class EmailConfig(EventSourceConfig):
     type: Literal["email"] = Field("email", init=False)
     """Email event."""
 
-    host: str = Field(description="IMAP server hostname")
+    host: str
     """IMAP server hostname (e.g. 'imap.gmail.com')"""
 
-    port: int = Field(default=993)
+    port: int = Field(ge=1, le=65535, default=993)
     """Server port (defaults to 993 for IMAP SSL)"""
 
     username: str
@@ -123,27 +123,23 @@ class EmailConfig(EventSourceConfig):
     password: SecretStr
     """Account password or app-specific password"""
 
-    folder: str = Field(default="INBOX")
+    folder: str = "INBOX"
     """Folder/mailbox to monitor"""
 
-    ssl: bool = Field(default=True)
+    ssl: bool = True
     """Whether to use SSL/TLS connection"""
 
-    check_interval: int = Field(
-        default=60, gt=0, description="Seconds between inbox checks"
-    )
+    check_interval: int = Field(default=60, gt=0)
     """How often to check for new emails (in seconds)"""
 
-    mark_seen: bool = Field(default=True)
+    mark_seen: bool = True
     """Whether to mark processed emails as seen"""
 
-    filters: dict[str, str] = Field(
-        default_factory=dict, description="Email filtering criteria"
-    )
+    filters: dict[str, str] = Field(default_factory=dict)
     """Filtering rules for emails (subject, from, etc)"""
 
-    max_size: int | None = Field(default=None, description="Maximum email size in bytes")
-    """Size limit for processed emails"""
+    max_size: int | None = Field(default=None, ge=0)
+    """Size limit for processed emails in bytes"""
 
 
 EventConfig = Annotated[

@@ -12,7 +12,6 @@ from eventic.log import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
-    from email.message import Message
 
     import aioimaplib
 
@@ -82,16 +81,14 @@ class EmailEventSource(EventSource):
         from email.parser import BytesParser
 
         parser = BytesParser()
-        email_msg: Message = parser.parsebytes(email_bytes)
-
-        # Check size limit if configured
+        email_msg = parser.parsebytes(email_bytes)
         if self.config.max_size and len(email_bytes) > self.config.max_size:
             msg = f"Email exceeds size limit of {self.config.max_size} bytes"
             raise ValueError(msg)
 
         # Extract content (prefer text/plain)
         content = ""
-        for part in email_msg.walk():  # walk() is a method of Message
+        for part in email_msg.walk():
             if part.get_content_type() == "text/plain":
                 payload = part.get_payload(decode=True)
                 if isinstance(payload, bytes):
@@ -102,16 +99,13 @@ class EmailEventSource(EventSource):
                 if isinstance(payload, bytes):
                     content = payload.decode()
 
-        # Create event with email metadata
+        meta = {"date": email_msg["date"], "message_id": email_msg["message-id"]}
         return EmailEventData(
             source=self.config.name,
             subject=email_msg["subject"],
             sender=email_msg["from"],
             body=content,
-            metadata={
-                "date": email_msg["date"],
-                "message_id": email_msg["message-id"],
-            },
+            metadata=meta,
         )
 
     async def events(self) -> AsyncGenerator[EventData]:
@@ -122,12 +116,10 @@ class EmailEventSource(EventSource):
 
         while not self._stop_event.is_set():
             try:
-                # Search for messages matching criteria
                 search_criteria = self._build_search_criteria()
                 _, messages = await self._client.search(search_criteria)
 
-                # Process each message
-                for num in messages[0].split():
+                for num in messages[0].split():  # Process each message
                     try:
                         # Fetch full message
                         _, msg_data = await self._client.fetch(num, "(RFC822)")
@@ -137,8 +129,7 @@ class EmailEventSource(EventSource):
                         email_bytes = msg_data[0][1]
                         event = self._process_email(email_bytes)
 
-                        # Mark as seen if configured
-                        if self.config.mark_seen:
+                        if self.config.mark_seen:  # Mark as seen if configured
                             await self._client.store(num, "+FLAGS", "\\Seen")
 
                         yield event
@@ -146,8 +137,7 @@ class EmailEventSource(EventSource):
                     except Exception:
                         logger.exception("Error processing email")
 
-                # Wait before next check
-                await asyncio.sleep(self.config.check_interval)
+                await asyncio.sleep(self.config.check_interval)  # Wait before next check
 
             except asyncio.CancelledError:
                 break

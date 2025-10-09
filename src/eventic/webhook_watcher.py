@@ -25,18 +25,16 @@ class WebhookEventSource(EventSource):
 
         self.config = config
         self.app = FastAPI()
-        self._queue: asyncio.Queue[EventData] = asyncio.Queue()
+        self._queue = asyncio.Queue[EventData]()
 
         @self.app.post(config.path)
         async def handle_webhook(request: Request):
-            # Verify signature if secret configured
-            if self.config.secret:
+            if self.config.secret:  # Verify signature if secret configured
                 signature = request.headers.get("X-Hub-Signature")
                 if not self._verify_signature(await request.body(), signature):
                     return {"status": "invalid signature"}
 
-            # Process payload
-            payload = await request.json()
+            payload = await request.json()  # Process payload
             event = EventData.create(source=self.config.name, content=payload)
             await self._queue.put(event)
             return {"status": "ok"}
@@ -45,11 +43,10 @@ class WebhookEventSource(EventSource):
         """Start webhook server."""
         import uvicorn
 
-        self.server = uvicorn.Server(
-            config=uvicorn.Config(
-                self.app, host="0.0.0.0", port=self.config.port, log_level="error"
-            )
+        cfg = uvicorn.Config(
+            self.app, host="0.0.0.0", port=self.config.port, log_level="error"
         )
+        self.server = uvicorn.Server(config=cfg)
         await self.server.serve()
 
     async def disconnect(self):

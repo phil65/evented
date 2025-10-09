@@ -12,9 +12,7 @@ from schemez import Schema
 
 
 if TYPE_CHECKING:
-    from llmling_agent_config.events import (
-        EventSourceConfig,
-    )
+    from llmling_agent_config.events import EventSourceConfig
 
 
 ChangeType = Literal["added", "modified", "deleted"]
