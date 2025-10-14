@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from eventic.base import EventSource
 from eventic.event_data import EmailEventData
@@ -12,6 +12,7 @@ from eventic.log import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from types import TracebackType
 
     import aioimaplib
 
@@ -29,7 +30,7 @@ class EmailEventSource(EventSource):
         self._client: aioimaplib.IMAP4_SSL | aioimaplib.IMAP4 | None = None
         self._stop_event = asyncio.Event()
 
-    async def connect(self):
+    async def __aenter__(self) -> Self:
         """Connect to email server with configured protocol."""
         import ssl
 
@@ -46,8 +47,14 @@ class EmailEventSource(EventSource):
             self.config.username, self.config.password.get_secret_value()
         )
         await self._client.select(self.config.folder)
+        return self
 
-    async def disconnect(self):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Close connection and cleanup."""
         self._stop_event.set()
         if self._client:

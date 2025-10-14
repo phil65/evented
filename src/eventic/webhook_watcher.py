@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from eventic.base import EventSource
 from eventic.event_data import EventData
@@ -11,6 +11,7 @@ from eventic.event_data import EventData
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from types import TracebackType
 
     from fastapi import Request
 
@@ -39,7 +40,7 @@ class WebhookEventSource(EventSource):
             await self._queue.put(event)
             return {"status": "ok"}
 
-    async def connect(self):
+    async def __aenter__(self) -> Self:
         """Start webhook server."""
         import uvicorn
 
@@ -48,8 +49,14 @@ class WebhookEventSource(EventSource):
         )
         self.server = uvicorn.Server(config=cfg)
         await self.server.serve()
+        return self
 
-    async def disconnect(self):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Stop webhook server."""
         if self.server:
             await self.server.shutdown()

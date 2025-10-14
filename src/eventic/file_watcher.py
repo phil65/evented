@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from eventic.base import EventSource
 from eventic.event_data import FileEventData
@@ -11,6 +11,7 @@ from eventic.event_data import FileEventData
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, AsyncIterator
+    from types import TracebackType
 
     from watchfiles import Change
     from watchfiles.main import FileChange
@@ -52,7 +53,7 @@ class FileSystemEventSource(EventSource):
         self._watch: AsyncIterator[set[FileChange]] | None = None
         self._stop_event: asyncio.Event | None = None
 
-    async def connect(self):
+    async def __aenter__(self) -> Self:
         """Set up watchfiles watcher."""
         if not self.config.paths:
             msg = "No paths specified to watch"
@@ -73,8 +74,14 @@ class FileSystemEventSource(EventSource):
             stop_event=self._stop_event,
             recursive=self.config.recursive,
         )
+        return self
 
-    async def disconnect(self):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Stop watchfiles watcher."""
         if self._stop_event:
             self._stop_event.set()

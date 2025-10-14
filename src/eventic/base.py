@@ -3,30 +3,37 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from eventic.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 from eventic.log import get_logger
 
 
-logger = get_logger(__name__)
-
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from types import TracebackType
 
     from eventic.configs import EventConfig
     from eventic.event_data import EventData
+
+
+logger = get_logger(__name__)
 
 
 class EventSource(ABC):
     """Base class for event sources."""
 
     @abstractmethod
-    async def connect(self):
+    async def __aenter__(self) -> Self:
         """Initialize connection to event source."""
 
     @abstractmethod
-    async def disconnect(self):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Close connection to event source."""
 
     @abstractmethod

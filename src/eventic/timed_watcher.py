@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from eventic.base import EventSource
 from eventic.event_data import TimeEventData
@@ -12,6 +12,7 @@ from eventic.event_data import TimeEventData
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
+    from types import TracebackType
 
     from eventic.configs import TimeEventConfig
     from eventic.event_data import EventData
@@ -27,7 +28,7 @@ class TimeEventSource(EventSource):
         self._stop_event = asyncio.Event()
         self._tz = zoneinfo.ZoneInfo(config.timezone) if config.timezone else None
 
-    async def connect(self):
+    async def __aenter__(self) -> Self:
         """Validate cron expression."""
         from croniter import croniter
 
@@ -37,8 +38,14 @@ class TimeEventSource(EventSource):
         except Exception as e:
             msg = f"Invalid cron expression: {e}"
             raise ValueError(msg) from e
+        return self
 
-    async def disconnect(self):
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Stop event generation."""
         self._stop_event.set()
 
