@@ -89,15 +89,17 @@ class EmailEventSource(EventSource):
         # Extract content (prefer text/plain)
         content = ""
         for part in email_msg.walk():
-            if part.get_content_type() == "text/plain":
-                payload = part.get_payload(decode=True)
-                if isinstance(payload, bytes):
-                    content = payload.decode()
-                break
-            if part.get_content_type() == "text/html":
-                payload = part.get_payload(decode=True)
-                if isinstance(payload, bytes):
-                    content = payload.decode()
+            content_type = part.get_content_type()
+            match content_type:
+                case "text/plain":
+                    payload = part.get_payload(decode=True)
+                    if isinstance(payload, bytes):
+                        content = payload.decode()
+                    break
+                case "text/html":
+                    payload = part.get_payload(decode=True)
+                    if isinstance(payload, bytes):
+                        content = payload.decode()
 
         meta = {"date": email_msg["date"], "message_id": email_msg["message-id"]}
         return EmailEventData(

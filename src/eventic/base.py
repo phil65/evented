@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+from eventic.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 from eventic.log import get_logger
 
 
@@ -52,13 +53,6 @@ class EventSource(ABC):
         Raises:
             ValueError: If source type is unknown or disabled
         """
-        from eventic.configs import (
-            EmailConfig,
-            FileWatchConfig,
-            TimeEventConfig,
-            WebhookConfig,
-        )
-
         if not config.enabled:
             msg = f"Source {config.name} is disabled"
             raise ValueError(msg)

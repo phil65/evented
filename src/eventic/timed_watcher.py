@@ -50,9 +50,7 @@ class TimeEventSource(EventSource):
             now = datetime.now(self._tz)
             cron = croniter(self.config.schedule, now)
             next_run = cron.get_next(datetime)
-
-            # Sleep until next run
-            delay = (next_run - now).total_seconds()
+            delay = (next_run - now).total_seconds()  # Sleep until next run
             if delay > 0:
                 try:
                     await asyncio.sleep(delay)

@@ -31,9 +31,7 @@ class ExtensionFilter:
         """
         from watchfiles.filters import DefaultFilter
 
-        self.extensions = tuple(
-            ext if ext.startswith(".") else f".{ext}" for ext in extensions
-        )
+        self.extensions = tuple(e if e.startswith(".") else f".{e}" for e in extensions)
         self._default_filter = DefaultFilter(ignore_paths=ignore_paths)
 
     def __call__(self, change: Change, path: str) -> bool:
@@ -63,9 +61,7 @@ class FileSystemEventSource(EventSource):
         from watchfiles.main import awatch
 
         self._stop_event = asyncio.Event()
-
-        # Create filter from extensions if provided
-        watch_filter = None
+        watch_filter = None  # Create filter from extensions if provided
         if self.config.extensions:
             to_ignore = self.config.ignore_paths
             watch_filter = ExtensionFilter(self.config.extensions, ignore_paths=to_ignore)
@@ -87,10 +83,9 @@ class FileSystemEventSource(EventSource):
 
     async def events(self) -> AsyncGenerator[EventData]:
         """Get file system events."""
-        watch = self._watch
         from watchfiles import Change
 
-        if not watch:
+        if not self._watch:
             msg = "Source not connected"
             raise RuntimeError(msg)
         change_to_type: dict[Change, ChangeType] = {
@@ -98,11 +93,9 @@ class FileSystemEventSource(EventSource):
             Change.modified: "modified",
             Change.deleted: "deleted",
         }
-        async for changes in watch:
+        async for changes in self._watch:
             for change, path in changes:
                 if change not in change_to_type:
                     continue
                 typ = change_to_type[change]
-                yield FileEventData.create(
-                    source=self.config.name, path=str(path), type=typ
-                )
+                yield FileEventData.create(self.config.name, path=str(path), type=typ)
