@@ -1,7 +1,7 @@
-site_name: "Eventic"
+site_name: "Evented"
 site_description: "Event emitters."
-repo_url: "https://github.com/phil65/eventic/"
-site_url: https://phil65.github.io/eventic/
+repo_url: "https://github.com/phil65/evented/"
+site_url: https://phil65.github.io/evented/
 site_author: "Philipp Temminghoff"
 copyright: Copyright &copy; 2025 Philipp Temminghoff
 
@@ -89,4 +89,4 @@ extra:
   - icon: fontawesome/brands/github
     link: https://github.com/phil65
   - icon: fontawesome/brands/python
-    link: https://pypi.org/project/eventic/
+    link: https://pypi.org/project/evented/

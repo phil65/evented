@@ -1,5 +1,5 @@
 [project]
-name = "eventic"
+name = "evented"
 version = "1.0.3"
 description = "Event emitters."
 readme = "README.md"
@@ -33,11 +33,11 @@ dependencies = [
 ]
 
 [project.urls]
-"Code coverage" = "https://app.codecov.io/gh/phil65/eventic"
-Discussions = "https://github.com/phil65/eventic/discussions"
-Documentation = "https://phil65.github.io/eventic/"
-Issues = "https://github.com/phil65/eventic/issues"
-Source = "https://github.com/phil65/eventic"
+"Code coverage" = "https://app.codecov.io/gh/phil65/evented"
+Discussions = "https://github.com/phil65/evented/discussions"
+Documentation = "https://phil65.github.io/evented/"
+Issues = "https://github.com/phil65/evented/issues"
+Source = "https://github.com/phil65/evented"
 
 [project.optional-dependencies]
 events = [

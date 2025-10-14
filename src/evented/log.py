@@ -1,4 +1,4 @@
-"""Logging configuration for eventic."""
+"""Logging configuration for evented."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ def get_logger(name: str) -> logging.Logger:
     """Get a logger for the given name.
 
     Args:
-        name: The name of the logger, will be prefixed with 'eventic.'
+        name: The name of the logger, will be prefixed with 'llmling_agent.'
 
     Returns:
         A logger instance
     """
-    return logging.getLogger(f"eventic.{name}")
+    return logging.getLogger(f"evented.{name}")
