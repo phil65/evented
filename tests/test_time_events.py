@@ -45,17 +45,25 @@ async def test_valid_cron_expression_passes():
 @pytest.mark.asyncio
 async def test_timezone_handling():
     """Test timezone is properly set during initialization."""
-    # Use UTC which is always available on all platforms
+    import zoneinfo
+
+    # Skip test if timezone data is not available (e.g., Windows CI)
+    try:
+        zoneinfo.ZoneInfo("UTC")
+        timezone_name = "UTC"
+    except zoneinfo.ZoneInfoNotFoundError:
+        pytest.skip("Timezone data not available on this system")
+
     config = TimeEventConfig(
         name="tz_test",
         schedule="0 12 * * *",
         prompt="Lunch reminder",
-        timezone="UTC",
+        timezone=timezone_name,
     )
 
     source = TimeEventSource(config)
     assert source._tz is not None
-    assert str(source._tz) == "UTC"
+    assert str(source._tz) == timezone_name
 
 
 def test_no_timezone_defaults_to_none():
