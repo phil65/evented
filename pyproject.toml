@@ -27,6 +27,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
+  "anyenv>=1.0.2",
   "pydantic",
   "schemez",
   # Only add below (Copier)
