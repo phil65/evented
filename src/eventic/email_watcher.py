@@ -26,23 +26,24 @@ class EmailEventSource(EventSource):
     """Monitors email inbox for events."""
 
     def __init__(self, config: EmailConfig):
-        self.config = config
-        self._client: aioimaplib.IMAP4_SSL | aioimaplib.IMAP4 | None = None
-        self._stop_event = asyncio.Event()
-
-    async def __aenter__(self) -> Self:
-        """Connect to email server with configured protocol."""
         import ssl
 
         import aioimaplib
 
+        self.config = config
+        self._stop_event = asyncio.Event()
+
+        # Create client object (no IO)
         if self.config.ssl:
             ssl_context = ssl.create_default_context()
-            self._client = aioimaplib.IMAP4_SSL(
+            self._client: aioimaplib.IMAP4_SSL | aioimaplib.IMAP4 = aioimaplib.IMAP4_SSL(
                 self.config.host, self.config.port, ssl_context=ssl_context
             )
         else:
             self._client = aioimaplib.IMAP4(self.config.host, self.config.port)
+
+    async def __aenter__(self) -> Self:
+        """Connect to email server with configured protocol."""
         await self._client.login(
             self.config.username, self.config.password.get_secret_value()
         )
@@ -57,13 +58,11 @@ class EmailEventSource(EventSource):
     ) -> None:
         """Close connection and cleanup."""
         self._stop_event.set()
-        if self._client:
-            try:
-                await self._client.close()
-                await self._client.logout()
-            except Exception:
-                logger.exception("Error during email client cleanup")
-        self._client = None
+        try:
+            await self._client.close()
+            await self._client.logout()
+        except Exception:
+            logger.exception("Error during email client cleanup")
 
     def _build_search_criteria(self) -> str:
         """Build IMAP search string from filters."""
@@ -119,10 +118,6 @@ class EmailEventSource(EventSource):
 
     async def events(self) -> AsyncGenerator[EventData]:
         """Monitor inbox and yield new email events."""
-        if not self._client:
-            msg = "Not connected to email server"
-            raise RuntimeError(msg)
-
         while not self._stop_event.is_set():
             try:
                 search_criteria = self._build_search_criteria()
