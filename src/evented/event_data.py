@@ -6,13 +6,14 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, Self
 
-from llmling_agent.utils.now import get_now
 from pydantic import ConfigDict, Field
 from schemez import Schema
 
+from evented.now import get_now
+
 
 if TYPE_CHECKING:
-    from llmling_agent_config.events import EventSourceConfig
+    from evented.configs import EventSourceConfig
 
 
 ChangeType = Literal["added", "modified", "deleted"]
