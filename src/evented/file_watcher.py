@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Self
 
-from eventic.base import EventSource
-from eventic.event_data import FileEventData
+from evented.base import EventSource
+from evented.event_data import FileEventData
 
 
 if TYPE_CHECKING:
@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from watchfiles import Change
     from watchfiles.main import FileChange
 
-    from eventic.configs import FileWatchConfig
-    from eventic.event_data import ChangeType, EventData
+    from evented.configs import FileWatchConfig
+    from evented.event_data import ChangeType, EventData
 
 
 class ExtensionFilter:

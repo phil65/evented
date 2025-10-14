@@ -5,8 +5,8 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Self
 
-from eventic.base import EventSource
-from eventic.event_data import EventData
+from evented.base import EventSource
+from evented.event_data import EventData
 
 
 if TYPE_CHECKING:
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     from fastapi import Request
 
-    from eventic.configs import WebhookConfig
+    from evented.configs import WebhookConfig
 
 
 class WebhookEventSource(EventSource):

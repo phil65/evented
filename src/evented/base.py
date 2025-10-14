@@ -1,20 +1,20 @@
-"""Event sources for Eventic."""
+"""Event sources for Evented."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Self
 
-from eventic.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
-from eventic.log import get_logger
+from evented.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
+from evented.log import get_logger
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from types import TracebackType
 
-    from eventic.configs import EventConfig
-    from eventic.event_data import EventData
+    from evented.configs import EventConfig
+    from evented.event_data import EventData
 
 
 logger = get_logger(__name__)
@@ -66,19 +66,19 @@ class EventSource(ABC):
         logger.info("Creating event source: %s (%s)", config.name, config.type)
         match config:
             case FileWatchConfig():
-                from eventic.file_watcher import FileSystemEventSource
+                from evented.file_watcher import FileSystemEventSource
 
                 return FileSystemEventSource(config)
             case WebhookConfig():
-                from eventic.webhook_watcher import WebhookEventSource
+                from evented.webhook_watcher import WebhookEventSource
 
                 return WebhookEventSource(config)
             case EmailConfig():
-                from eventic.email_watcher import EmailEventSource
+                from evented.email_watcher import EmailEventSource
 
                 return EmailEventSource(config)
             case TimeEventConfig():
-                from eventic.timed_watcher import TimeEventSource
+                from evented.timed_watcher import TimeEventSource
 
                 return TimeEventSource(config)
             case _:

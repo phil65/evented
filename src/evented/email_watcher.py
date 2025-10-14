@@ -5,9 +5,9 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Self
 
-from eventic.base import EventSource
-from eventic.event_data import EmailEventData
-from eventic.log import get_logger
+from evented.base import EventSource
+from evented.event_data import EmailEventData
+from evented.log import get_logger
 
 
 if TYPE_CHECKING:
@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 
     import aioimaplib
 
-    from eventic.configs import EmailConfig
-    from eventic.event_data import EventData
+    from evented.configs import EmailConfig
+    from evented.event_data import EventData
 
 logger = get_logger(__name__)
 

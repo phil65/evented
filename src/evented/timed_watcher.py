@@ -6,16 +6,16 @@ import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING, Self
 
-from eventic.base import EventSource
-from eventic.event_data import TimeEventData
+from evented.base import EventSource
+from evented.event_data import TimeEventData
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from types import TracebackType
 
-    from eventic.configs import TimeEventConfig
-    from eventic.event_data import EventData
+    from evented.configs import TimeEventConfig
+    from evented.event_data import EventData
 
 
 class TimeEventSource(EventSource):
