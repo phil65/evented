@@ -48,7 +48,8 @@ async def test_context_manager_exception_handling():
     try:
         async with source:
             # Simulate an exception during context
-            raise ValueError("Test exception")
+            msg = "Test exception"
+            raise ValueError(msg)  # noqa: TRY301
     except ValueError:
         pass  # Expected
 

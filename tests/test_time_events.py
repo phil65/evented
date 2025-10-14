@@ -167,5 +167,5 @@ def test_invalid_cron_expressions():
         source = TimeEventSource(config)
 
         # Validation should happen in __aenter__
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             asyncio.run(source.__aenter__())

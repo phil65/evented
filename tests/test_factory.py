@@ -39,7 +39,7 @@ def test_factory_creates_correct_webhook_source():
 
     assert isinstance(source, WebhookEventSource)
     assert source.config is config
-    assert source.config.port == 8080
+    assert source.config.port == 8080  # noqa: PLR2004
 
 
 def test_factory_creates_correct_time_source():
@@ -119,7 +119,7 @@ def test_email_config_defaults():
     # Check defaults
     assert config.ssl is True
     assert config.folder == "INBOX"
-    assert config.check_interval == 60
+    assert config.check_interval == 60  # noqa: PLR2004
 
 
 def test_email_config_non_ssl_defaults():
