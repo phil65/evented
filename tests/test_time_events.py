@@ -45,16 +45,17 @@ async def test_valid_cron_expression_passes():
 @pytest.mark.asyncio
 async def test_timezone_handling():
     """Test timezone is properly set during initialization."""
+    # Use UTC which is always available on all platforms
     config = TimeEventConfig(
         name="tz_test",
         schedule="0 12 * * *",
         prompt="Lunch reminder",
-        timezone="America/New_York",
+        timezone="UTC",
     )
 
     source = TimeEventSource(config)
     assert source._tz is not None
-    assert str(source._tz) == "America/New_York"
+    assert str(source._tz) == "UTC"
 
 
 def test_no_timezone_defaults_to_none():
