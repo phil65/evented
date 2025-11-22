@@ -95,7 +95,7 @@ class FileWatchConfig(EventSourceConfig):
     """Whether to watch subdirectories."""
 
     debounce: int = Field(
-        default=1600, title="Debounce time (ms)", examples=[500, 1000, 3000]
+        default=1600, ge=0, title="Debounce time (ms)", examples=[500, 1000, 3000]
     )
     """Minimum time (ms) between trigger events."""
 
