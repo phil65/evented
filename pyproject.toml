@@ -41,7 +41,7 @@ Issues = "https://github.com/phil65/evented/issues"
 Source = "https://github.com/phil65/evented"
 
 [project.optional-dependencies]
-events = [
+all = [
   "watchfiles",
   "aioimaplib>=2.0.1",
   "croniter>=6.0.0",
