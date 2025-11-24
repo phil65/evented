@@ -168,9 +168,7 @@ def test_config_discriminator_types():
         (FileWatchConfig(name="file", paths=["/tmp"]), "file"),
         (WebhookConfig(name="webhook", port=8080, path="/test"), "webhook"),
         (
-            EmailConfig(
-                name="email", host="test.com", username="user", password=SecretStr("pass")
-            ),
+            EmailConfig(name="email", host="test.com", username="user", password=SecretStr("pass")),
             "email",
         ),
         (TimeEventConfig(name="time", schedule="0 0 * * *", prompt="test"), "time"),

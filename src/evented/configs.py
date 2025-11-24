@@ -106,14 +106,10 @@ class WebhookConfig(EventSourceConfig):
     type: Literal["webhook"] = Field("webhook", init=False)
     """webhook-based event."""
 
-    port: int = Field(
-        default=..., ge=1, le=65535, title="Server port", examples=[8080, 3000]
-    )
+    port: int = Field(default=..., ge=1, le=65535, title="Server port", examples=[8080, 3000])
     """Port to listen on."""
 
-    path: str = Field(
-        title="Webhook path", examples=["/webhook", "/github-webhook", "/api/events"]
-    )
+    path: str = Field(title="Webhook path", examples=["/webhook", "/github-webhook", "/api/events"])
     """URL path to handle requests."""
 
     secret: SecretStr | None = Field(default=None, title="Webhook secret")
@@ -168,9 +164,7 @@ class EmailConfig(EventSourceConfig):
     )
     """IMAP server hostname (e.g. 'imap.gmail.com')"""
 
-    port: int = Field(
-        ge=1, le=65535, default=993, title="IMAP port", examples=[993, 143, 587]
-    )
+    port: int = Field(ge=1, le=65535, default=993, title="IMAP port", examples=[993, 143, 587])
     """Server port (defaults to 993 for IMAP SSL)"""
 
     username: str = Field(

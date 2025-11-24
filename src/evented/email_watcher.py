@@ -44,9 +44,7 @@ class EmailEventSource(EventSource):
 
     async def __aenter__(self) -> Self:
         """Connect to email server with configured protocol."""
-        await self._client.login(
-            self.config.username, self.config.password.get_secret_value()
-        )
+        await self._client.login(self.config.username, self.config.password.get_secret_value())
         await self._client.select(self.config.folder)
         return self
 

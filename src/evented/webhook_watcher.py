@@ -44,9 +44,7 @@ class WebhookEventSource(EventSource):
         """Start webhook server."""
         import uvicorn
 
-        cfg = uvicorn.Config(
-            self.app, host="0.0.0.0", port=self.config.port, log_level="error"
-        )
+        cfg = uvicorn.Config(self.app, host="0.0.0.0", port=self.config.port, log_level="error")
         self.server = uvicorn.Server(config=cfg)
         await self.server.serve()
         return self
