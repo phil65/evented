@@ -8,7 +8,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from functools import wraps
 import inspect
-from typing import TYPE_CHECKING, Any, Self, overload
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import SecretStr
 
@@ -39,19 +39,22 @@ class EventManager:
 
     def __init__(
         self,
+        configs: list[EventConfig] | None = None,
+        event_callbacks: list[EventCallback] | None = None,
         enable_events: bool = True,
-        auto_run: bool = True,
     ) -> None:
         """Initialize event manager.
 
         Args:
+            configs: List of event configurations
+            event_callbacks: List of event callbacks
             enable_events: Whether to enable event processing
-            auto_run: Whether to automatically call run() for event callbacks
         """
+        self.configs = configs or []
         self.enabled = enable_events
         self._sources: dict[str, EventSource] = {}
-        self._callbacks: list[EventCallback] = []
-        self._observers: defaultdict[str, list[EventObserver]] = defaultdict(list)
+        self._callbacks = event_callbacks or []
+        self._observers = defaultdict[str, list[EventObserver]](list)
 
     def add_callback(self, callback: EventCallback) -> None:
         """Register an event callback."""
@@ -271,34 +274,22 @@ class EventManager:
         """Allow using manager as async context manager."""
         if not self.enabled:
             return self
-
+        for trigger in self.configs:
+            await self.add_source(trigger)
         return self
 
     async def __aexit__(self, *exc: object):
         """Clean up when exiting context."""
         await self.cleanup()
 
-    @overload
     def track[T](
         self,
         event_name: str | None = None,
         **event_metadata: Any,
-    ) -> Callable[[Callable[..., T]], Callable[..., T]]: ...
-
-    @overload
-    def track[T](
-        self,
-        event_name: str | None = None,
-        **event_metadata: Any,
-    ) -> Callable[
-        [Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]
-    ]: ...
-
-    def track(
-        self,
-        event_name: str | None = None,
-        **event_metadata: Any,
-    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    ) -> (
+        Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]
+        | Callable[[Callable[..., T]], Callable[..., T]]
+    ):
         """Track function calls as events.
 
         Args:
@@ -359,27 +350,14 @@ class EventManager:
 
         return decorator
 
-    @overload
     def poll[T](
         self,
         event_type: str,
         interval: timedelta | None = None,
-    ) -> Callable[[Callable[..., T]], Callable[..., T]]: ...
-
-    @overload
-    def poll[T](
-        self,
-        event_type: str,
-        interval: timedelta | None = None,
-    ) -> Callable[
-        [Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]
-    ]: ...
-
-    def poll(
-        self,
-        event_type: str,
-        interval: timedelta | None = None,
-    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    ) -> (
+        Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]
+        | Callable[[Callable[..., T]], Callable[..., T]]
+    ):
         """Decorator to register an event observer.
 
         Args:
@@ -426,3 +404,13 @@ class EventObserver:
             await execute(self.callback, event)
         except Exception:
             logger.exception("Error in event observer")
+
+
+if __name__ == "__main__":
+    from evented.event_data import EventData
+
+    async def dummy_callback(event: EventData) -> None:
+        if prompt := event.to_prompt():
+            print(f"Received: {prompt}")
+
+    event_manager = EventManager(event_callbacks=[dummy_callback])
