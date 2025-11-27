@@ -41,7 +41,7 @@ class EventManager:
         self,
         enable_events: bool = True,
         auto_run: bool = True,
-    ):
+    ) -> None:
         """Initialize event manager.
 
         Args:
@@ -53,20 +53,19 @@ class EventManager:
         self._callbacks: list[EventCallback] = []
         self._observers: defaultdict[str, list[EventObserver]] = defaultdict(list)
 
-    def add_callback(self, callback: EventCallback):
+    def add_callback(self, callback: EventCallback) -> None:
         """Register an event callback."""
         self._callbacks.append(callback)
 
-    def remove_callback(self, callback: EventCallback):
+    def remove_callback(self, callback: EventCallback) -> None:
         """Remove a previously registered callback."""
         self._callbacks.remove(callback)
 
-    async def emit_event(self, event: EventData):
+    async def emit_event(self, event: EventData) -> None:
         """Emit event to all callbacks."""
         if not self.enabled:
             return
 
-        # Run custom callbacks
         for callback in self._callbacks:
             try:
                 result = callback(event)
@@ -112,7 +111,7 @@ class EventManager:
         *,
         name: str | None = None,
         port: int = 8000,
-        secret: SecretStr | None = None,
+        secret: str | SecretStr | None = None,
     ) -> EventSource:
         """Add webhook event source.
 
@@ -123,7 +122,8 @@ class EventManager:
             secret: Optional secret for request validation
         """
         name = name or f"webhook_{len(self._sources)}"
-        config = WebhookConfig(name=name, path=path, port=port, secret=secret)
+        sec = SecretStr(secret) if isinstance(secret, str) else None
+        config = WebhookConfig(name=name, path=path, port=port, secret=sec)
         return await self.add_source(config)
 
     async def add_timed_event(
@@ -229,7 +229,7 @@ class EventManager:
         else:
             return source
 
-    async def remove_source(self, name: str):
+    async def remove_source(self, name: str) -> None:
         """Stop and remove an event source.
 
         Args:
@@ -239,7 +239,7 @@ class EventManager:
             await source.__aexit__(None, None, None)
             logger.debug("Removed event source: %s", name)
 
-    async def _process_events(self, source: EventSource):
+    async def _process_events(self, source: EventSource) -> None:
         """Process events from a source.
 
         Args:
@@ -260,7 +260,7 @@ class EventManager:
         except Exception:
             logger.exception("Error processing events")
 
-    async def cleanup(self):
+    async def cleanup(self) -> None:
         """Clean up all event sources and tasks."""
         self.enabled = False
 
@@ -327,11 +327,8 @@ class EventManager:
                         await self.emit_event(event)
                 except Exception as e:
                     if self.enabled:
-                        meta |= {
-                            "status": "error",
-                            "error": str(e),
-                            "duration": get_now() - start_time,
-                        }
+                        dur = get_now() - start_time
+                        meta |= {"status": "error", "error": str(e), "duration": dur}
                         event = EventData.create(name, content=str(e), metadata=meta)
                         await self.emit_event(event)
                     raise
@@ -350,11 +347,8 @@ class EventManager:
                         run_background(self.emit_event(event))
                 except Exception as e:
                     if self.enabled:
-                        meta |= {
-                            "status": "error",
-                            "error": str(e),
-                            "duration": get_now() - start_time,
-                        }
+                        dur = get_now() - start_time
+                        meta |= {"status": "error", "error": str(e), "duration": dur}
                         event = EventData.create(name, content=str(e), metadata=meta)
                         run_background(self.emit_event(event))
                     raise
@@ -426,7 +420,7 @@ class EventObserver:
     interval: timedelta | None = None
     last_run: datetime | None = None
 
-    async def __call__(self, event: EventData):
+    async def __call__(self, event: EventData) -> None:
         """Handle an event."""
         try:
             await execute(self.callback, event)
