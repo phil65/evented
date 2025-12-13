@@ -75,7 +75,9 @@ class EventManager:
                 if isinstance(result, Awaitable):
                     await result
             except Exception:
-                logger.exception("Error in event callback %r", callback.__name__)
+                logger.exception(
+                    "Error in event callback %r", getattr(callback, "__name__", "unknown")
+                )
 
     async def add_file_watch(
         self,
@@ -304,7 +306,7 @@ class EventManager:
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            name = event_name or func.__name__
+            name = event_name or getattr(func, "__name__", "unknown")
 
             @wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
