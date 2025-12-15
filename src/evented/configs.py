@@ -53,7 +53,7 @@ class EventSourceConfig(Schema):
     include_timestamp: bool = Field(default=True, title="Include timestamp")
     """Control timestamp visibility in template."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(json_schema_extra={"x-doc-title": "Event source"})
 
 
 class FileWatchConfig(EventSourceConfig):
@@ -99,6 +99,8 @@ class FileWatchConfig(EventSourceConfig):
     )
     """Minimum time (ms) between trigger events."""
 
+    model_config = ConfigDict(json_schema_extra={"x-doc-title": "File watching"})
+
 
 class WebhookConfig(EventSourceConfig):
     """Webhook event source."""
@@ -114,6 +116,8 @@ class WebhookConfig(EventSourceConfig):
 
     secret: SecretStr | None = Field(default=None, title="Webhook secret")
     """Optional secret for request validation."""
+
+    model_config = ConfigDict(json_schema_extra={"x-doc-title": "Webhook"})
 
 
 class TimeEventConfig(EventSourceConfig):
@@ -147,6 +151,8 @@ class TimeEventConfig(EventSourceConfig):
 
     skip_missed: bool = Field(default=False, title="Skip missed executions")
     """Whether to skip executions missed while agent was inactive"""
+
+    model_config = ConfigDict(json_schema_extra={"x-doc-title": "Time event"})
 
 
 class EmailConfig(EventSourceConfig):
@@ -212,6 +218,8 @@ class EmailConfig(EventSourceConfig):
         examples=[1048576, 5242880, 10485760],
     )
     """Size limit for processed emails in bytes"""
+
+    model_config = ConfigDict(json_schema_extra={"x-doc-title": "Email"})
 
 
 EventConfig = Annotated[
