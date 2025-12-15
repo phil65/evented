@@ -2,7 +2,7 @@
 
 [project]
 name = "evented"
-version = "1.0.8"
+version = "1.0.9"
 description = "Event emitters."
 readme = "README.md"
 requires-python = ">=3.13"
