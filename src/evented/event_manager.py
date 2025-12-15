@@ -307,6 +307,7 @@ class EventManager:
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             name = event_name or getattr(func, "__name__", "unknown")
+            assert isinstance(name, str)
 
             @wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
