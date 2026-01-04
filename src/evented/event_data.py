@@ -13,7 +13,7 @@ from evented.now import get_now
 
 
 if TYPE_CHECKING:
-    from evented.configs import EventSourceConfig
+    from evented_config import EventSourceConfig
 
 
 ChangeType = Literal["added", "modified", "deleted"]

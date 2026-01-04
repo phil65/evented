@@ -6,8 +6,8 @@ import asyncio
 
 import pytest
 
-from evented.configs import TimeEventConfig
 from evented.timed_watcher import TimeEventSource
+from evented_config import TimeEventConfig
 
 
 @pytest.mark.asyncio

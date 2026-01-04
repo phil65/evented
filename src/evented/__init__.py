@@ -18,8 +18,9 @@ __url__ = "https://github.com/phil65/evented"
 
 
 from evented.base import EventSource
-from evented.configs import (
+from evented_config import (
     EmailConfig,
+    EventConfig,
     EventSourceConfig,
     FileWatchConfig,
     TimeEventConfig,
@@ -41,6 +42,7 @@ __all__ = [
     "EmailConfig",
     "EmailEventData",
     "EmailEventSource",
+    "EventConfig",
     "EventData",
     "EventSource",
     "EventSourceConfig",

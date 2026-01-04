@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from watchfiles import Change
     from watchfiles.main import FileChange
 
-    from evented.configs import FileWatchConfig
     from evented.event_data import ChangeType, EventData
+    from evented_config import FileWatchConfig
 
 
 class ExtensionFilter:

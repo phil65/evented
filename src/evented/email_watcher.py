@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 
     import aioimaplib
 
-    from evented.configs import EmailConfig
     from evented.event_data import EventData
+    from evented_config import EmailConfig
 
 logger = get_logger(__name__)
 

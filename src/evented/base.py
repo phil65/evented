@@ -5,16 +5,16 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Self
 
-from evented.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 from evented.log import get_logger
+from evented_config import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from types import TracebackType
 
-    from evented.configs import EventConfig
     from evented.event_data import EventData
+    from evented_config import EventConfig
 
 
 logger = get_logger(__name__)

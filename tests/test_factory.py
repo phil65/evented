@@ -6,10 +6,10 @@ from pydantic import SecretStr, ValidationError
 import pytest
 
 from evented.base import EventSource
-from evented.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 from evented.file_watcher import FileSystemEventSource
 from evented.timed_watcher import TimeEventSource
 from evented.webhook_watcher import WebhookEventSource
+from evented_config import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 
 
 def test_factory_creates_correct_file_source():

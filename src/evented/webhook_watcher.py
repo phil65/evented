@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
     from fastapi import Request
 
-    from evented.configs import WebhookConfig
+    from evented_config import WebhookConfig
 
 
 class WebhookEventSource(EventSource):

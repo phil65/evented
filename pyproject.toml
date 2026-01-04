@@ -283,6 +283,10 @@ python-platform = "all"
 default-groups = ["dev", "lint", "docs"]
 
 [tool.uv.build-backend]
+module-name = [
+  "evented",
+  "evented_config",
+]
 wheel-exclude = [
   ".mypy_cache/**",
   "__pycache__/**",

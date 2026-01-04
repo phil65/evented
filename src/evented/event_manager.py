@@ -12,11 +12,11 @@ from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import SecretStr
 
-from evented.configs import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 from evented.event_data import EventData, FunctionResultEventData
 from evented.helpers import execute, run_background
 from evented.log import get_logger
 from evented.now import get_now
+from evented_config import EmailConfig, FileWatchConfig, TimeEventConfig, WebhookConfig
 
 
 if TYPE_CHECKING:
@@ -24,8 +24,8 @@ if TYPE_CHECKING:
     from datetime import datetime, timedelta
 
     from evented.base import EventSource
-    from evented.configs import EventConfig
     from evented.timed_watcher import TimeEventSource
+    from evented_config import EventConfig
 
 
 logger = get_logger(__name__)

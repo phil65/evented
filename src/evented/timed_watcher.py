@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator
     from types import TracebackType
 
-    from evented.configs import TimeEventConfig
     from evented.event_data import EventData
+    from evented_config import TimeEventConfig
 
 
 class TimeEventSource(EventSource):

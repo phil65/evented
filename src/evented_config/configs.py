@@ -1,11 +1,22 @@
-"""Event sources for LLMling agent."""
+"""Event source configuration.
+
+This is a lightweight config-only package for fast imports.
+For the actual event sources, use `from evented import ...`.
+"""
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import ConfigDict, Field, SecretStr
 from schemez import Schema
+
+
+if TYPE_CHECKING:
+    from evented.email_watcher import EmailEventSource
+    from evented.file_watcher import FileSystemEventSource
+    from evented.timed_watcher import TimedEventSource
+    from evented.webhook_watcher import WebhookEventSource
 
 
 DEFAULT_TEMPLATE = """
@@ -24,26 +35,22 @@ Metadata:
 class EventSourceConfig(Schema):
     """Base configuration for event sources."""
 
-    type: str = Field(init=False)
+    type: str = Field(init=False, title="Event source type")
     """Discriminator field for event source types."""
 
     name: str = Field(
+        examples=["file_watcher", "api_webhook", "scheduler"],
         title="Event source name",
-        examples=["file_watcher", "webhook_handler", "daily_report"],
     )
     """Unique identifier for this event source."""
 
-    enabled: bool = True
+    enabled: bool = Field(default=True, title="Source enabled")
     """Whether this event source is active."""
 
     template: str = Field(
         default=DEFAULT_TEMPLATE,
+        examples=[DEFAULT_TEMPLATE, "New event: {{ content }}", "{{ timestamp }}: {{ source }}"],
         title="Event template",
-        examples=[
-            "Event: {{ content }}",
-            "{{ timestamp }}: {{ source }} - {{ content }}",
-            "Alert from {{ source }}: {{ content }}\nMetadata: {{ metadata }}",
-        ],
     )
     """Jinja2 template for formatting events."""
 
@@ -55,6 +62,16 @@ class EventSourceConfig(Schema):
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "Event source"})
 
+    def get_event_source(
+        self,
+    ) -> FileSystemEventSource | WebhookEventSource | EmailEventSource | TimedEventSource:
+        """Create the event source instance.
+
+        Returns:
+            The configured event source instance.
+        """
+        raise NotImplementedError
+
 
 class FileWatchConfig(EventSourceConfig):
     """File watching event source."""
@@ -63,43 +80,43 @@ class FileWatchConfig(EventSourceConfig):
     """File / folder content change events."""
 
     paths: list[str] = Field(
+        examples=[["./src", "./docs"], ["/home/user/projects"], ["*.py", "config/*.yaml"]],
         title="Watch paths",
-        examples=[
-            ["/home/user/documents", "/var/log"],
-            ["./config", "./src"],
-        ],
     )
     """Paths or patterns to watch for changes."""
 
     extensions: list[str] | None = Field(
         default=None,
+        examples=[[".py", ".md"], [".js", ".ts", ".json"], [".yaml", ".yml"]],
         title="File extensions",
-        examples=[
-            [".py", ".js", ".ts"],
-            [".yaml", ".yml", ".json"],
-        ],
     )
     """File extensions to monitor (e.g. ['.py', '.md'])."""
 
     ignore_paths: list[str] | None = Field(
         default=None,
-        title="Ignore paths",
-        examples=[
-            [".git", "__pycache__", "node_modules"],
-            ["/tmp/*", "*.cache"],
-        ],
+        examples=[["__pycache__", ".git"], ["node_modules"], ["*.tmp"]],
+        title="Ignore patterns",
     )
     """Paths or patterns to ignore."""
 
-    recursive: bool = Field(default=True, title="Watch recursively")
+    recursive: bool = Field(default=True, title="Recursive watching")
     """Whether to watch subdirectories."""
 
     debounce: int = Field(
-        default=1600, ge=0, title="Debounce time (ms)", examples=[500, 1000, 3000]
+        default=1600,
+        gt=0,
+        examples=[500, 1600, 3000],
+        title="Debounce delay (ms)",
     )
     """Minimum time (ms) between trigger events."""
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "File watching"})
+
+    def get_event_source(self) -> FileSystemEventSource:
+        """Create file system event source instance."""
+        from evented.file_watcher import FileSystemEventSource
+
+        return FileSystemEventSource(config=self)
 
 
 class WebhookConfig(EventSourceConfig):
@@ -108,16 +125,29 @@ class WebhookConfig(EventSourceConfig):
     type: Literal["webhook"] = Field("webhook", init=False)
     """webhook-based event."""
 
-    port: int = Field(default=..., ge=1, le=65535, title="Server port", examples=[8080, 3000])
+    port: int = Field(examples=[8080, 9000, 3000], title="Listen port", ge=1, lt=65536)
     """Port to listen on."""
 
-    path: str = Field(title="Webhook path", examples=["/webhook", "/github-webhook", "/api/events"])
+    path: str = Field(
+        examples=["/webhook", "/api/events", "/github-webhook"],
+        title="URL path",
+    )
     """URL path to handle requests."""
 
-    secret: SecretStr | None = Field(default=None, title="Webhook secret")
+    secret: SecretStr | None = Field(
+        default=None,
+        examples=["webhook_secret_123", "github_webhook_key"],
+        title="Validation secret",
+    )
     """Optional secret for request validation."""
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "Webhook"})
+
+    def get_event_source(self) -> WebhookEventSource:
+        """Create webhook event source instance."""
+        from evented.webhook_watcher import WebhookEventSource
+
+        return WebhookEventSource(config=self)
 
 
 class TimeEventConfig(EventSourceConfig):
@@ -127,25 +157,21 @@ class TimeEventConfig(EventSourceConfig):
     """Time event."""
 
     schedule: str = Field(
+        examples=["0 9 * * 1-5", "*/30 * * * *", "0 0 * * 0"],
         title="Cron schedule",
-        examples=[
-            "0 9 * * 1-5",  # weekdays at 9am
-            "*/15 * * * *",  # every 15 minutes
-            "0 0 * * 0",  # every Sunday at midnight
-        ],
     )
     """Cron expression for scheduling (e.g. '0 9 * * 1-5' for weekdays at 9am)"""
 
     prompt: str = Field(
+        examples=["Daily status check", "Generate weekly report", "Check system health"],
         title="Trigger prompt",
-        examples=["Generate daily report", "Check system status", "Send weekly summary"],
     )
     """Prompt to send to the agent when the schedule triggers."""
 
     timezone: str | None = Field(
         default=None,
-        title="Timezone",
-        examples=["UTC", "America/New_York", "Europe/London", "Asia/Tokyo"],
+        examples=["UTC", "America/New_York", "Europe/London"],
+        title="Schedule timezone",
     )
     """Timezone for schedule (defaults to system timezone)"""
 
@@ -153,6 +179,12 @@ class TimeEventConfig(EventSourceConfig):
     """Whether to skip executions missed while agent was inactive"""
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "Time event"})
+
+    def get_event_source(self) -> TimedEventSource:
+        """Create timed event source instance."""
+        from evented.timed_watcher import TimedEventSource
+
+        return TimedEventSource(config=self)
 
 
 class EmailConfig(EventSourceConfig):
@@ -165,35 +197,35 @@ class EmailConfig(EventSourceConfig):
     """Email event."""
 
     host: str = Field(
-        title="IMAP server",
-        examples=["imap.gmail.com", "imap.outlook.com", "mail.company.com"],
+        description="IMAP server hostname",
+        examples=["imap.gmail.com", "outlook.office365.com", "imap.example.com"],
+        title="IMAP server host",
     )
     """IMAP server hostname (e.g. 'imap.gmail.com')"""
 
-    port: int = Field(ge=1, le=65535, default=993, title="IMAP port", examples=[993, 143, 587])
+    port: int = Field(
+        default=993, ge=1, lt=65536, examples=[993, 143, 465], title="IMAP server port"
+    )
     """Server port (defaults to 993 for IMAP SSL)"""
 
-    username: str = Field(
-        title="Email username",
-        examples=["user@gmail.com", "notifications@company.com", "monitor"],
-    )
+    username: str = Field(examples=["user@gmail.com", "admin@company.com"], title="Email username")
     """Email account username/address"""
 
     password: SecretStr = Field(title="Email password")
     """Account password or app-specific password"""
 
-    folder: str = Field(
-        default="INBOX",
-        title="Email folder",
-        examples=["INBOX", "Alerts", "Notifications", "INBOX/Reports"],
-    )
+    folder: str = Field(default="INBOX", examples=["INBOX", "Sent", "Drafts"], title="Email folder")
     """Folder/mailbox to monitor"""
 
     ssl: bool = Field(default=True, title="Use SSL/TLS")
     """Whether to use SSL/TLS connection"""
 
     check_interval: int = Field(
-        default=60, gt=0, title="Check interval (seconds)", examples=[30, 60, 300]
+        default=60,
+        gt=0,
+        description="Seconds between inbox checks",
+        examples=[30, 60, 300],
+        title="Check interval",
     )
     """How often to check for new emails (in seconds)"""
 
@@ -202,24 +234,26 @@ class EmailConfig(EventSourceConfig):
 
     filters: dict[str, str] = Field(
         default_factory=dict,
+        description="Email filtering criteria",
         title="Email filters",
-        examples=[
-            {"SUBJECT": "Alert", "FROM": "system@company.com"},
-            {"SUBJECT": "ERROR", "TO": "alerts@company.com"},
-            {"FROM": "monitoring@company.com", "SUBJECT": "Warning"},
-        ],
     )
     """Filtering rules for emails (subject, from, etc)"""
 
     max_size: int | None = Field(
         default=None,
-        ge=0,
-        title="Max email size (bytes)",
+        description="Maximum email size in bytes",
         examples=[1048576, 5242880, 10485760],
+        title="Maximum email size",
     )
-    """Size limit for processed emails in bytes"""
+    """Size limit for processed emails"""
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "Email"})
+
+    def get_event_source(self) -> EmailEventSource:
+        """Create email event source instance."""
+        from evented.email_watcher import EmailEventSource
+
+        return EmailEventSource(config=self)
 
 
 EventConfig = Annotated[
