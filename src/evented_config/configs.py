@@ -15,7 +15,7 @@ from schemez import Schema
 if TYPE_CHECKING:
     from evented.email_watcher import EmailEventSource
     from evented.file_watcher import FileSystemEventSource
-    from evented.timed_watcher import TimedEventSource
+    from evented.timed_watcher import TimeEventSource
     from evented.webhook_watcher import WebhookEventSource
 
 
@@ -64,7 +64,7 @@ class EventSourceConfig(Schema):
 
     def get_event_source(
         self,
-    ) -> FileSystemEventSource | WebhookEventSource | EmailEventSource | TimedEventSource:
+    ) -> FileSystemEventSource | WebhookEventSource | EmailEventSource | TimeEventSource:
         """Create the event source instance.
 
         Returns:
@@ -180,11 +180,11 @@ class TimeEventConfig(EventSourceConfig):
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "Time event"})
 
-    def get_event_source(self) -> TimedEventSource:
+    def get_event_source(self) -> TimeEventSource:
         """Create timed event source instance."""
-        from evented.timed_watcher import TimedEventSource
+        from evented.timed_watcher import TimeEventSource
 
-        return TimedEventSource(config=self)
+        return TimeEventSource(config=self)
 
 
 class EmailConfig(EventSourceConfig):
