@@ -27,7 +27,9 @@ from evented_config import (
     WebhookConfig,
 )
 from evented.email_watcher import EmailEventSource
+from evented.event_manager import EventManager
 from evented.file_watcher import FileSystemEventSource
+from evented.timed_watcher import TimeEventSource
 from evented.webhook_watcher import WebhookEventSource
 from evented.event_data import (
     EventData,
@@ -44,6 +46,7 @@ __all__ = [
     "EmailEventSource",
     "EventConfig",
     "EventData",
+    "EventManager",
     "EventSource",
     "EventSourceConfig",
     "FileEventData",
@@ -52,6 +55,7 @@ __all__ = [
     "FunctionResultEventData",
     "TimeEventConfig",
     "TimeEventData",
+    "TimeEventSource",
     "WebhookConfig",
     "WebhookEventData",
     "WebhookEventSource",
