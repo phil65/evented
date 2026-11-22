@@ -9,7 +9,6 @@
 [![Implementation](https://img.shields.io/pypi/implementation/evented.svg)](https://pypi.org/project/evented/)
 [![Releases](https://img.shields.io/github/downloads/phil65/evented/total.svg)](https://github.com/phil65/evented/releases)
 [![Github Contributors](https://img.shields.io/github/contributors/phil65/evented)](https://github.com/phil65/evented/graphs/contributors)
-[![Github Discussions](https://img.shields.io/github/discussions/phil65/evented)](https://github.com/phil65/evented/discussions)
 [![Github Forks](https://img.shields.io/github/forks/phil65/evented)](https://github.com/phil65/evented/forks)
 [![Github Issues](https://img.shields.io/github/issues/phil65/evented)](https://github.com/phil65/evented/issues)
 [![Github Issues](https://img.shields.io/github/issues-pr/phil65/evented)](https://github.com/phil65/evented/pulls)
