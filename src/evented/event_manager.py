@@ -127,7 +127,7 @@ class EventManager:
             secret: Optional secret for request validation
         """
         name = name or f"webhook_{len(self._sources)}"
-        sec = SecretStr(secret) if isinstance(secret, str) else None
+        sec = SecretStr(secret) if isinstance(secret, str) else secret
         config = WebhookConfig(name=name, path=path, port=port, secret=sec)
         return await self.add_source(config)
 
@@ -317,13 +317,13 @@ class EventManager:
                     result = await func(*args, **kwargs)
                     if self.enabled:
                         meta |= {"status": "success", "duration": get_now() - start_time}
-                        event = EventData.create(name, content=result, metadata=meta)
+                        event = FunctionResultEventData.create(name, result=result, metadata=meta)
                         await self.emit_event(event)
                 except Exception as e:
                     if self.enabled:
                         dur = get_now() - start_time
                         meta |= {"status": "error", "error": str(e), "duration": dur}
-                        event = EventData.create(name, content=str(e), metadata=meta)
+                        event = FunctionResultEventData.create(name, result=str(e), metadata=meta)
                         await self.emit_event(event)
                     raise
                 else:
@@ -337,13 +337,13 @@ class EventManager:
                     result = func(*args, **kwargs)
                     if self.enabled:
                         meta |= {"status": "success", "duration": get_now() - start_time}
-                        event = EventData.create(name, content=result, metadata=meta)
+                        event = FunctionResultEventData.create(name, result=result, metadata=meta)
                         run_background(self.emit_event(event))
                 except Exception as e:
                     if self.enabled:
                         dur = get_now() - start_time
                         meta |= {"status": "error", "error": str(e), "duration": dur}
-                        event = EventData.create(name, content=str(e), metadata=meta)
+                        event = FunctionResultEventData.create(name, result=str(e), metadata=meta)
                         run_background(self.emit_event(event))
                     raise
                 else:
