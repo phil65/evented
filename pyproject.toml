@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
   "anyenv>=1.0.2",
+  "jinjarope>=1.0.0",
   "pydantic",
   "schemez",
   # Only add below (Copier)
@@ -46,6 +47,7 @@ all = [
   "aioimaplib>=2.0.1",
   "croniter>=6.0.0",
   "fastapi",
+  "uvicorn>=0.30.0",
 ]
 
 [dependency-groups]
