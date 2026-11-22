@@ -93,7 +93,7 @@ class TimeEventData(EventData):
     """Cron expression that triggered this event."""
 
     prompt: str
-    """Cron expression that triggered this event."""
+    """Prompt configured for the schedule."""
 
     def to_prompt(self) -> str:
         """Format scheduled event."""

@@ -361,16 +361,19 @@ class EventManager:
         Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]
         | Callable[[Callable[..., T]], Callable[..., T]]
     ):
-        """Decorator to register an event observer.
+        """Decorator that emits a function's return value as an event.
+
+        Each call of the decorated function emits a `FunctionResultEventData`
+        with `source=event_type` and the return value as `result`.
 
         Args:
-            event_type: Type of event to observe
-            interval: Optional polling interval for periodic checks
+            event_type: Event source name for the emitted events
+            interval: Optional polling interval (stored on the registered observer)
 
         Example:
-            @event_manager.observe("file_changed")
-            async def handle_file_change(event: FileEventData):
-                await process_file(event.path)
+            @event_manager.poll("disk_usage")
+            async def check_disk() -> float:
+                return shutil.disk_usage("/").used / shutil.disk_usage("/").total
         """
 
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
