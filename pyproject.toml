@@ -2,7 +2,7 @@
 
 [project]
 name = "evented"
-version = "1.1.0"
+version = "1.2.0"
 description = "Async event sources (file watching, webhooks, email, cron) with typed pydantic events and an event manager."
 readme = "README.md"
 requires-python = ">=3.13"
