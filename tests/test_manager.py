@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 import pytest
 
 from evented.event_data import EventData
@@ -166,3 +168,40 @@ async def test_event_manager_with_initial_callbacks():
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+async def test_track_emits_function_result_events(event_manager: EventManager):
+    """Test that tracked sync and async functions emit result events."""
+    from evented.event_data import FunctionResultEventData
+
+    received: list[EventData] = []
+    event_manager.add_callback(received.append)
+
+    @event_manager.track("double")
+    async def double(x: int) -> int:
+        return x * 2
+
+    @event_manager.track()
+    def fail() -> None:
+        raise ValueError("boom")
+
+    assert await double(3) == 6  # noqa: PLR2004
+    with pytest.raises(ValueError, match="boom"):
+        fail()
+    await asyncio.sleep(0)  # let the background emit of the sync wrapper run
+
+    assert len(received) == 2  # noqa: PLR2004
+    assert all(isinstance(e, FunctionResultEventData) for e in received)
+    assert received[0].source == "double"
+    assert received[0].metadata["status"] == "success"
+    assert received[0].to_prompt() == "6"
+    assert received[1].source == "fail"
+    assert received[1].metadata["status"] == "error"
+
+
+def test_time_config_get_event_source():
+    """Test that TimeEventConfig creates a TimeEventSource."""
+    from evented import TimeEventSource
+
+    config = TimeEventConfig(name="t", schedule="* * * * *", prompt="p")
+    assert isinstance(config.get_event_source(), TimeEventSource)
