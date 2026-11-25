@@ -68,11 +68,12 @@ all = [
 dev = [
   "deptry",
   "devtools",
+  # Only add below (Copier)
+  "httpx2",  # starlette's TestClient (webhook tests)
   "pyreadline3",
   "pytest",
   "pytest-asyncio>=1.2.0",
   "pytest-cov",
-  # Only add below (Copier)
 ]
 benchmark = ["pyinstrument"]
 docs = [
