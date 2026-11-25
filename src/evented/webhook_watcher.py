@@ -23,6 +23,7 @@ class WebhookEventSource(EventSource):
 
     def __init__(self, config: WebhookConfig):
         from fastapi import FastAPI, Request
+        from fastapi.responses import JSONResponse
 
         self.config = config
         self.app = FastAPI()
@@ -32,9 +33,13 @@ class WebhookEventSource(EventSource):
 
         async def handle_webhook(request: Request):
             if self.config.secret:  # Verify signature if secret configured
-                signature = request.headers.get("X-Hub-Signature")
+                # GitHub & co. send `X-Hub-Signature-256: sha256=<hex>` (current) and
+                # `X-Hub-Signature: sha1=<hex>` (legacy).
+                signature = request.headers.get("X-Hub-Signature-256") or request.headers.get(
+                    "X-Hub-Signature"
+                )
                 if not self._verify_signature(await request.body(), signature):
-                    return {"status": "invalid signature"}
+                    return JSONResponse({"status": "invalid signature"}, status_code=401)
 
             payload = await request.json()  # Process payload
             event = WebhookEventData.create(source=self.config.name, payload=payload)
@@ -83,13 +88,21 @@ class WebhookEventSource(EventSource):
             yield event
 
     def _verify_signature(self, payload: bytes, signature: str | None) -> bool:
-        """Verify webhook signature."""
+        """Verify an HMAC signature of the payload.
+
+        Accepts `sha256=<hex>` (GitHub's `X-Hub-Signature-256`), `sha1=<hex>` (legacy
+        `X-Hub-Signature`) and a bare SHA-256 hex digest.
+        """
         import hashlib
         import hmac
 
         if not signature or not self.config.secret:
             return False
+        algorithm, sep, digest = signature.strip().partition("=")
+        if not sep:
+            algorithm, digest = "sha256", signature.strip()
+        if algorithm not in {"sha256", "sha1"}:
+            return False
         key = self.config.secret.get_secret_value().encode()
-        expected = hmac.new(key, payload, hashlib.sha256).hexdigest()
-
-        return hmac.compare_digest(signature, expected)
+        expected = hmac.new(key, payload, getattr(hashlib, algorithm)).hexdigest()
+        return hmac.compare_digest(digest, expected)

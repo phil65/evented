@@ -83,7 +83,7 @@ and pytest with coverage on Linux/macOS/Windows for 3.13 and 3.14 (3.14 may fail
 |---|---|---|---|---|
 | IMAP4rev1 (via aioimaplib); messages parsed as RFC 5322 | https://www.rfc-editor.org/rfc/rfc3501 | IMAP4rev1 (RFC 3501) | `src/evented/email_watcher.py` | https://github.com/bamthomas/aioimaplib/releases |
 | Cron expressions (croniter syntax) | https://github.com/pallets-eco/croniter | unpinned (tracks latest croniter) | `src/evented/timed_watcher.py` | same URL |
-| Webhook HMAC signature | https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries | own scheme: bare hex HMAC-SHA256 of the body in `X-Hub-Signature` (GitHub sends `X-Hub-Signature-256: sha256=<hex>`, so GitHub deliveries do not verify as is) | `src/evented/webhook_watcher.py` (`_verify_signature`) | n/a |
+| Webhook HMAC signature | https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries | GitHub scheme: `X-Hub-Signature-256: sha256=<hex>` (preferred), legacy `X-Hub-Signature: sha1=<hex>`, bare SHA-256 hex accepted; invalid -> HTTP 401 | `src/evented/webhook_watcher.py` (`_verify_signature`) | n/a |
 
 ## Pitfalls
 
