@@ -58,7 +58,7 @@ uv run pytest                        # tests (asyncio_mode = "auto")
 uv run ruff check . && uv run ruff format --check .
 uv run ty check                      # type check, checks src/ only; warnings fail CI
 uv run deptry src                    # declared vs imported dependencies
-uv run mkdocs-mknodes build          # docs (or: uv run duty build / duty serve)
+uv run mknodes build          # docs (or: uv run duty build / duty serve)
 uv run duty lint                     # ruff fix + format + ty
 uv build
 ```
