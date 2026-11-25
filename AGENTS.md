@@ -77,6 +77,14 @@ and pytest with coverage on Linux/macOS/Windows for 3.13 and 3.14 (3.14 may fail
 - Google-style docstrings, ruff line length 100, preview formatting.
 - Tests: plain pytest functions, async tests need no marker.
 
+## Specs
+
+| Spec | URL | Targets | Code | Update check |
+|---|---|---|---|---|
+| IMAP4rev1 (via aioimaplib); messages parsed as RFC 5322 | https://www.rfc-editor.org/rfc/rfc3501 | IMAP4rev1 (RFC 3501) | `src/evented/email_watcher.py` | https://github.com/bamthomas/aioimaplib/releases |
+| Cron expressions (croniter syntax) | https://github.com/pallets-eco/croniter | unpinned (tracks latest croniter) | `src/evented/timed_watcher.py` | same URL |
+| Webhook HMAC signature | https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries | own scheme: bare hex HMAC-SHA256 of the body in `X-Hub-Signature` (GitHub sends `X-Hub-Signature-256: sha256=<hex>`, so GitHub deliveries do not verify as is) | `src/evented/webhook_watcher.py` (`_verify_signature`) | n/a |
+
 ## Pitfalls
 
 - Copier-managed project (`.copier-answers.yml`, template `copier-phil65`): don't hand-edit
