@@ -68,9 +68,6 @@ class WebhookEventSource(EventSource):
             await self._queue.put(event)
             return {"status": "ok"}
 
-        # Annotations are strings (PEP 563) and Request is not importable from module
-        # globals, so give FastAPI the real class to detect the request parameter.
-        handle_webhook.__annotations__["request"] = Request
         self.app.post(config.path)(handle_webhook)
 
     async def __aenter__(self) -> Self:
