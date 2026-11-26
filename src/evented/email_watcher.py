@@ -41,6 +41,7 @@ class EmailEventSource(EventSource):
 
         import aioimaplib
 
+        self._stop_event.clear()
         # aioimaplib connects in the constructor, so the client is created here.
         if self.config.ssl:
             ssl_context = ssl.create_default_context()

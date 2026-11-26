@@ -8,6 +8,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from functools import wraps
 import inspect
+import itertools
 from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import SecretStr
@@ -53,6 +54,9 @@ class EventManager:
         self.configs = configs or []
         self.enabled = enable_events
         self._sources: dict[str, EventSource] = {}
+        self._tasks: dict[str, asyncio.Task[None]] = {}
+        self._name_counter = itertools.count()
+        self._loop: asyncio.AbstractEventLoop | None = None
         self._callbacks = event_callbacks or []
         self._observers = defaultdict[str, list[EventObserver]](list)
 
@@ -64,12 +68,19 @@ class EventManager:
         """Remove a previously registered callback."""
         self._callbacks.remove(callback)
 
+    def _new_name(self, prefix: str) -> str:
+        """Return an unused source name (a count of the sources collides after removals)."""
+        while (name := f"{prefix}_{next(self._name_counter)}") in self._sources:
+            pass
+        return name
+
     async def emit_event(self, event: EventData) -> None:
         """Emit event to all callbacks."""
         if not self.enabled:
             return
 
-        for callback in self._callbacks:
+        # A copy: a callback may remove itself (one-shot handlers).
+        for callback in tuple(self._callbacks):
             try:
                 result = callback(event)
                 if isinstance(result, Awaitable):
@@ -101,7 +112,7 @@ class EventManager:
         """
         path_list = [paths] if isinstance(paths, str) else list(paths)
         config = FileWatchConfig(
-            name=name or f"file_watch_{len(self._sources)}",
+            name=name or self._new_name("file_watch"),
             paths=path_list,
             extensions=extensions,
             ignore_paths=ignore_paths,
@@ -126,7 +137,7 @@ class EventManager:
             port: Port to listen on
             secret: Optional secret for request validation
         """
-        name = name or f"webhook_{len(self._sources)}"
+        name = name or self._new_name("webhook")
         sec = SecretStr(secret) if isinstance(secret, str) else secret
         config = WebhookConfig(name=name, path=path, port=port, secret=sec)
         return await self.add_source(config)
@@ -150,7 +161,7 @@ class EventManager:
             skip_missed: Whether to skip missed executions
         """
         config = TimeEventConfig(
-            name=name or f"timed_{len(self._sources)}",
+            name=name or self._new_name("timed"),
             schedule=schedule,
             prompt=prompt,
             timezone=timezone,
@@ -189,7 +200,7 @@ class EventManager:
             max_size: Maximum email size in bytes
         """
         config = EmailConfig(
-            name=name or f"email_{len(self._sources)}",
+            name=name or self._new_name("email"),
             host=host,
             username=username,
             password=SecretStr(password),
@@ -223,9 +234,11 @@ class EventManager:
             source = EventSource.from_config(config)
             await source.__aenter__()
             self._sources[config.name] = source
+            self._loop = asyncio.get_running_loop()
             # Start processing events
             name = f"event_processor_{config.name}"
-            self._task = asyncio.create_task(self._process_events(source), name=name)
+            task = asyncio.create_task(self._process_events(source), name=name)
+            self._tasks[config.name] = task
             logger.debug("Added event source: %s", config.name)
         except Exception as e:
             msg = f"Failed to add event source {config.name}"
@@ -240,6 +253,12 @@ class EventManager:
         Args:
             name: Name of source to remove
         """
+        # Stop the processing task first: a source whose events() doesn't end on exit
+        # (webhook queue, a sleeping schedule) would otherwise keep it alive or emit once
+        # more.
+        if task := self._tasks.pop(name, None):
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
         if source := self._sources.pop(name, None):
             await source.__aexit__(None, None, None)
             logger.debug("Removed event source: %s", name)
@@ -266,9 +285,10 @@ class EventManager:
             logger.exception("Error processing events")
 
     async def cleanup(self) -> None:
-        """Clean up all event sources and tasks."""
-        self.enabled = False
+        """Clean up all event sources and tasks.
 
+        The manager stays usable: entering it again starts the configured sources anew.
+        """
         for name in list(self._sources):
             await self.remove_source(name)
 
@@ -338,13 +358,13 @@ class EventManager:
                     if self.enabled:
                         meta |= {"status": "success", "duration": get_now() - start_time}
                         event = FunctionResultEventData.create(name, result=result, metadata=meta)
-                        run_background(self.emit_event(event))
+                        run_background(self.emit_event(event), loop=self._loop)
                 except Exception as e:
                     if self.enabled:
                         dur = get_now() - start_time
                         meta |= {"status": "error", "error": str(e), "duration": dur}
                         event = FunctionResultEventData.create(name, result=str(e), metadata=meta)
-                        run_background(self.emit_event(event))
+                        run_background(self.emit_event(event), loop=self._loop)
                     raise
                 else:
                     return result

@@ -30,6 +30,7 @@ class WebhookEventSource(EventSource):
         self._queue = asyncio.Queue[EventData]()
         self.server: uvicorn.Server | None = None
         self._server_task: asyncio.Task[None] | None = None
+        self._stop_event = asyncio.Event()
 
         async def handle_webhook(request: Request):
             if self.config.secret:  # Verify signature if secret configured
@@ -55,6 +56,7 @@ class WebhookEventSource(EventSource):
         """Start webhook server."""
         import uvicorn
 
+        self._stop_event.clear()
         cfg = uvicorn.Config(self.app, host="0.0.0.0", port=self.config.port, log_level="error")
         self.server = uvicorn.Server(config=cfg)
         # serve() only returns on shutdown, so run it in the background.
@@ -74,6 +76,7 @@ class WebhookEventSource(EventSource):
         exc_tb: TracebackType | None,
     ) -> None:
         """Stop webhook server."""
+        self._stop_event.set()
         if self.server:
             self.server.should_exit = True
         if self._server_task:
@@ -83,9 +86,19 @@ class WebhookEventSource(EventSource):
 
     async def events(self) -> AsyncGenerator[EventData]:
         """Yield events as they arrive."""
-        while True:
-            event = await self._queue.get()
-            yield event
+        stop = asyncio.ensure_future(self._stop_event.wait())
+        get: asyncio.Future[EventData] | None = None
+        try:
+            while not self._stop_event.is_set():
+                get = asyncio.ensure_future(self._queue.get())
+                await asyncio.wait({get, stop}, return_when=asyncio.FIRST_COMPLETED)
+                if not get.done():
+                    break
+                yield get.result()
+        finally:
+            stop.cancel()
+            if get is not None:
+                get.cancel()
 
     def _verify_signature(self, payload: bytes, signature: str | None) -> bool:
         """Verify an HMAC signature of the payload.

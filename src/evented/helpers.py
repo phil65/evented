@@ -6,9 +6,14 @@ import asyncio
 import inspect
 from typing import TYPE_CHECKING, Any, overload
 
+from evented.log import get_logger
+
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Coroutine
+
+
+logger = get_logger(__name__)
 
 
 @overload
@@ -50,20 +55,36 @@ async def execute[T](
     return result
 
 
-def run_background(coro: Coroutine[Any, Any, Any], name: str | None = None) -> None:
-    """Run a coroutine in the background and track it."""
-    try:
-        asyncio.create_task(coro, name=name)  # noqa: RUF006
+_background_tasks: set[asyncio.Task[Any]] = set()
+"""Strong references to background tasks (the loop only keeps weak ones)."""
 
+
+def run_background(
+    coro: Coroutine[Any, Any, Any],
+    name: str | None = None,
+    loop: asyncio.AbstractEventLoop | None = None,
+) -> None:
+    """Run a coroutine in the background.
+
+    On the running loop: as a task that is kept referenced until it is done. From
+    another thread: on `loop` if it is running. Without any loop: to completion in a
+    new loop (blocking the caller).
+    """
+    try:
+        running = asyncio.get_running_loop()
     except RuntimeError:
-        # No running loop - use fire_and_forget
-        try:
-            loop = asyncio.get_running_loop()
-            _task = loop.create_task(coro)  # noqa: RUF006
-        except RuntimeError:
-            # No running loop - use new loop
-            loop = asyncio.new_event_loop()
-            try:
-                loop.run_until_complete(coro)
-            finally:
-                loop.close()
+        running = None
+    if running is not None:
+        task = running.create_task(coro, name=name)
+        _background_tasks.add(task)
+        task.add_done_callback(_background_tasks.discard)
+        task.add_done_callback(_log_task_error)
+    elif loop is not None and loop.is_running():
+        asyncio.run_coroutine_threadsafe(coro, loop)
+    else:
+        asyncio.run(coro)
+
+
+def _log_task_error(task: asyncio.Task[Any]) -> None:
+    if not task.cancelled() and (exc := task.exception()):
+        logger.error("Background task %s failed", task.get_name(), exc_info=exc)

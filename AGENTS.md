@@ -96,6 +96,7 @@ and pytest with coverage on Linux/macOS/Windows for 3.13 and 3.14 (3.14 may fail
   `TYPE_CHECKING`-only type breaks routes (see the annotation fix in `webhook_watcher.py`).
 - `WebhookEventSource` binds `0.0.0.0:<port>`; `EmailEventSource` talks to a real IMAP server.
   Unit tests must not start them against real services.
-- `EventManager.poll()` registers observers in `_observers`, but nothing dispatches to them yet;
-  `remove_source()` exits the source but doesn't cancel its processing task.
+- `EventManager.poll()` registers observers in `_observers`, but nothing dispatches to them yet.
+- `EventManager` keeps one processing task per source (`_tasks`); `remove_source()` cancels
+  and awaits it before exiting the source.
 - Pre-commit (prek) runs ruff, ty and the full pytest suite on every commit.

@@ -32,6 +32,7 @@ class TimeEventSource(EventSource):
         """Validate cron expression."""
         from croniter import croniter
 
+        self._stop_event.clear()
         try:
             now = datetime.now(self._tz)
             croniter(self.config.schedule, now)
@@ -60,9 +61,14 @@ class TimeEventSource(EventSource):
             delay = (next_run - now).total_seconds()  # Sleep until next run
             if delay > 0:
                 try:
-                    await asyncio.sleep(delay)
+                    # Wake up early when stopped instead of yielding one more event.
+                    await asyncio.wait_for(self._stop_event.wait(), delay)
+                except TimeoutError:
+                    pass
                 except asyncio.CancelledError:
                     break
+            if self._stop_event.is_set():
+                break
 
             # Skip if we missed the schedule and skip_missed is True
             if self.config.skip_missed:
