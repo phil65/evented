@@ -73,6 +73,7 @@ dev = [
   "pytest",
   "pytest-asyncio>=1.2.0",
   "pytest-cov",
+  "pytz",  # aioimaplib's MockImapServer (email tests)
 ]
 benchmark = ["pyinstrument"]
 docs = [
