@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Self
 
 from evented.base import EventSource
 from evented.event_data import EventData, WebhookEventData
+from evented.log import get_logger
 
 
 if TYPE_CHECKING:
@@ -16,6 +17,20 @@ if TYPE_CHECKING:
     import uvicorn
 
     from evented_config import WebhookConfig
+
+
+logger = get_logger(__name__)
+
+
+def _is_loopback(host: str) -> bool:
+    import ipaddress
+
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
 
 
 class WebhookEventSource(EventSource):
@@ -42,7 +57,10 @@ class WebhookEventSource(EventSource):
                 if not self._verify_signature(await request.body(), signature):
                     return JSONResponse({"status": "invalid signature"}, status_code=401)
 
-            payload = await request.json()  # Process payload
+            try:
+                payload = await request.json()
+            except ValueError:  # json.JSONDecodeError, UnicodeDecodeError
+                return JSONResponse({"status": "invalid JSON"}, status_code=400)
             event = WebhookEventData.create(source=self.config.name, payload=payload)
             await self._queue.put(event)
             return {"status": "ok"}
@@ -57,7 +75,15 @@ class WebhookEventSource(EventSource):
         import uvicorn
 
         self._stop_event.clear()
-        cfg = uvicorn.Config(self.app, host="0.0.0.0", port=self.config.port, log_level="error")
+        host = self.config.host
+        if not self.config.secret and not _is_loopback(host):
+            logger.warning(
+                "Webhook %r listens on %s without a secret: anyone who can reach it can "
+                "inject events",
+                self.config.name,
+                host,
+            )
+        cfg = uvicorn.Config(self.app, host=host, port=self.config.port, log_level="error")
         self.server = uvicorn.Server(config=cfg)
         # serve() only returns on shutdown, so run it in the background.
         self._server_task = asyncio.create_task(self.server.serve())

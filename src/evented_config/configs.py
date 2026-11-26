@@ -125,6 +125,13 @@ class WebhookConfig(EventSourceConfig):
     type: Literal["webhook"] = Field("webhook", init=False)
     """webhook-based event."""
 
+    host: str = Field(
+        default="127.0.0.1",
+        examples=["127.0.0.1", "0.0.0.0"],
+        title="Listen host",
+    )
+    """Interface to bind to. Loopback by default; set a secret when binding a public one."""
+
     port: int = Field(examples=[8080, 9000, 3000], title="Listen port", ge=1, lt=65536)
     """Port to listen on."""
 
@@ -139,7 +146,7 @@ class WebhookConfig(EventSourceConfig):
         examples=["webhook_secret_123", "github_webhook_key"],
         title="Validation secret",
     )
-    """Optional secret for request validation."""
+    """Optional secret for request validation (HMAC signature, see the docs)."""
 
     model_config = ConfigDict(json_schema_extra={"x-doc-title": "Webhook"})
 

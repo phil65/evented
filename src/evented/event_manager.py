@@ -128,6 +128,7 @@ class EventManager:
         name: str | None = None,
         port: int = 8000,
         secret: str | SecretStr | None = None,
+        host: str = "127.0.0.1",
     ) -> EventSource:
         """Add webhook event source.
 
@@ -136,10 +137,11 @@ class EventManager:
             name: Optional source name
             port: Port to listen on
             secret: Optional secret for request validation
+            host: Interface to bind to (loopback by default)
         """
         name = name or self._new_name("webhook")
         sec = SecretStr(secret) if isinstance(secret, str) else secret
-        config = WebhookConfig(name=name, path=path, port=port, secret=sec)
+        config = WebhookConfig(name=name, path=path, port=port, secret=sec, host=host)
         return await self.add_source(config)
 
     async def add_timed_event(

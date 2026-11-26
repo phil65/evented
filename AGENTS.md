@@ -94,7 +94,9 @@ and pytest with coverage on Linux/macOS/Windows for 3.13 and 3.14 (3.14 may fail
 - `EventData` is abstract: build events from a concrete subclass, never `EventData.create()`.
 - FastAPI resolves handler annotations at runtime; with postponed annotations a
   `TYPE_CHECKING`-only type breaks routes (see the annotation fix in `webhook_watcher.py`).
-- `WebhookEventSource` binds `0.0.0.0:<port>`; `EmailEventSource` talks to a real IMAP server.
+- `WebhookEventSource` binds `WebhookConfig.host` (default `127.0.0.1`; warns when a non-loopback
+  host has no secret); `EmailEventSource` talks to a real IMAP server (tests use aioimaplib's
+  `MockImapServer`).
   Unit tests must not start them against real services.
 - `EventManager.poll()` registers observers in `_observers`, but nothing dispatches to them yet.
 - `EventManager` keeps one processing task per source (`_tasks`); `remove_source()` cancels
