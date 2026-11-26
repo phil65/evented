@@ -1,7 +1,5 @@
 """Tests for async context manager behavior across event sources."""
 
-from __future__ import annotations
-
 import asyncio
 
 import pytest

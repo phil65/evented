@@ -1,7 +1,5 @@
 """Logging configuration for evented."""
 
-from __future__ import annotations
-
 import logging
 
 

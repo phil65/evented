@@ -1,7 +1,5 @@
 """Time-based event source for scheduling agent actions."""
 
-from __future__ import annotations
-
 import asyncio
 from datetime import datetime
 from typing import TYPE_CHECKING, Self

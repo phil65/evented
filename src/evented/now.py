@@ -1,7 +1,5 @@
 """Date and time utilities."""
 
-from __future__ import annotations
-
 from datetime import UTC, datetime
 from typing import Literal
 

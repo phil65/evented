@@ -1,7 +1,5 @@
 """Tests for time-based event source."""
 
-from __future__ import annotations
-
 import asyncio
 
 import pytest

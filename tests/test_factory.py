@@ -1,7 +1,5 @@
 """Tests for EventSource factory method and configuration validation."""
 
-from __future__ import annotations
-
 from pydantic import SecretStr, ValidationError
 import pytest
 

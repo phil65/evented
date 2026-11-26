@@ -4,8 +4,6 @@ This is a lightweight config-only package for fast imports.
 For the actual event sources, use `from evented import ...`.
 """
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import ConfigDict, Field, SecretStr
