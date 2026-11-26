@@ -68,7 +68,7 @@ and pytest with coverage on Linux/macOS/Windows for 3.13 and 3.14 (3.14 may fail
 
 ## Conventions
 
-- Python >= 3.13, `from __future__ import annotations` everywhere, PEP 695 generics/`type`.
+- Python >= 3.14, no `from __future__ import annotations` (PEP 649; banned via ruff TID251), PEP 695 generics/`type`.
 - Typing-only imports go under `TYPE_CHECKING`. Optional deps (`watchfiles`, `fastapi`,
   `uvicorn`, `aioimaplib`, `croniter`) are imported inside functions so `import evented`
   works without the `all` extra.
