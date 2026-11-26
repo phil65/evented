@@ -34,7 +34,12 @@ def _is_loopback(host: str) -> bool:
 
 
 class WebhookEventSource(EventSource):
-    """Listens for webhook events on configured endpoint."""
+    """Listens for webhook events on configured endpoint.
+
+    Received events wait in an unbounded queue until `events()` takes them: a flood of
+    requests (or a consumer that stops reading) grows memory. Bind to loopback or set a
+    `secret` on public interfaces.
+    """
 
     def __init__(self, config: WebhookConfig):
         from fastapi import FastAPI, Request

@@ -105,13 +105,17 @@ You can also pass a list of configs to the manager: `EventManager(configs=[...])
 | `EmailConfig` (`email`) | `EmailEventSource` | aioimaplib (IMAP) | `EmailEventData` |
 | `TimeEventConfig` (`time`) | `TimeEventSource` | croniter | `TimeEventData` |
 
+The webhook source keeps received events in an unbounded queue until they are processed: bind
+it to loopback (the default) or set a `secret` before exposing it.
+
 ## Features
 
 - **One interface for every source**: each source is an async context manager with an
   `events()` async generator, so you can use it without the manager.
 - **`EventManager`**: runs several sources at once, calls sync or async callbacks, and has
   shortcuts like `add_file_watch()`, `add_webhook()`, `add_email_watch()` and
-  `add_timed_event()`.
+  `add_timed_event()`. Callbacks run one at a time, in registration order (async callbacks
+  are awaited in turn, not concurrently), so a slow callback holds up the others.
 - **Function tracking**: `@manager.track()` emits a `FunctionResultEventData` for each call,
   with arguments, duration and success/error status in `metadata`.
 - **Prompt templates**: `await event.format(config)` renders an event with the source's Jinja

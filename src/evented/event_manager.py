@@ -75,7 +75,12 @@ class EventManager:
         return name
 
     async def emit_event(self, event: EventData) -> None:
-        """Emit event to all callbacks."""
+        """Emit event to all callbacks.
+
+        Callbacks run one after another, in registration order: an async callback is
+        awaited before the next one starts (they are not run concurrently), so a slow
+        callback delays the others and the source's next event.
+        """
         if not self.enabled:
             return
 
